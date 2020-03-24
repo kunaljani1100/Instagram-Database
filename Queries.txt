@@ -1,0 +1,74 @@
+﻿TOP TRENDING TAGS
+select tagname,count(username)
+from tagfollow
+group by tagname
+order by count(username) desc limit 5;
+
+
+
+
+TAG LIKED BY USER FOR FUTURE SUGGESTED POSTS
+with likedlist as
+(
+        select tagname,count(username)*0.3 as liked
+        from (postlike natural join posttaged)
+        where username='deveshahuja9'
+        group by tagname
+        order by count(username) desc
+)
+select tagname,count(username)*0.6+liked as suggestdedindex
+from (saved natural join posttaged natural join likedlist)
+where username='deveshahuja9'
+group by tagname,liked
+order by (count(username)*0.3+liked*0.6) desc;
+
+
+
+
+
+
+
+
+AVAILABLE STORIES FOR USER
+select s.storyid
+from ((users natural join follows) as f join story as s on f.followsusername=s.username)
+where f.username='deveshahuja9' and extract(hour from s.timestamp)<24;
+
+
+
+
+LIST OF LOCATION WISE POSTS FOR ALL VISIBLE POSTS
+
+
+with plist as (
+        select postid,username
+        from post natural join users
+        where not privacystatus
+        union 
+        select postid,followsusername
+        from ((users natural join follows) as u join post as z on u.followsusername=z.username)
+        where u.username='deveshahuja9'
+)
+select y.postid,location
+from (plist as x join post as y on x.postid=y.postid)
+group by location,y.postid
+order by location asc;
+
+
+List of top replied hashtag for a user.
+
+
+Select Tagname,count(*) 
+from Story natural join Storyreply natural join StoryTaged where Username ='rastogijii' 
+group by Tagname;
+ 
+
+
+
+
+List of users pair in descending order of average messages per day. 
+Select count(*) as co  from Messages where senderUsername = 'deveshahuja9' group by senderUsername, receiverUsername,timestamp order by co desc;
+
+
+ List of common followers who follow both users. 
+with list as ( Select  username,followsusername from Follows where Username='deveshahuja9' union ( select username,followsusername from Follows where Username='ankit_aahil')) select distinct followsusername from list;

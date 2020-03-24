@@ -1,0 +1,19 @@
+set search_path to instagram;
+CREATE OR REPLACE FUNCTION aft_delete()
+  RETURNS trigger AS
+$$
+BEGIN
+delete from post where post.username=old.username;
+RETURN NEW;
+END;
+
+$$
+LANGUAGE 'plpgsql';
+CREATE TRIGGER delete_stu
+  AFTER DELETE
+  ON users
+  FOR EACH ROW
+  EXECUTE PROCEDURE aft_delete();
+
+delete from users where users.username='_abh1shek_'
+select*from post where post.username='_abh1shek_'

@@ -1,0 +1,299 @@
+﻿CREATE SCHEMA instagram;
+Set search_path to instagram;
+
+
+CREATE TABLE Users
+(
+  Username VARCHAR(100),
+  Name VARCHAR(50),
+  Bio VARCHAR(100),
+  ProfilePhoto VARCHAR(100),
+  PrivacyStatus BOOL NOT NULL,
+  Verified BOOL NOT NULL,
+  PRIMARY KEY (Username)
+);
+
+
+
+
+CREATE TABLE Post
+(
+  PostID NUMERIC(10,0) ,
+  Type VARCHAR(6) NOT NULL,
+  Length TIME,
+  Date TIMESTAMP NOT NULL,
+  Location VARCHAR(50),
+  Caption VARCHAR(100),
+  Archived BOOLEAN NOT NULL,
+  Username VARCHAR(100) NOT NULL,
+  PRIMARY KEY (PostID),
+  FOREIGN KEY (Username) REFERENCES Users(Username) 
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+
+CREATE TABLE Story
+(
+  StoryID NUMERIC(10,0),
+  TimeStamp TIME NOT NULL,
+  Type VARCHAR(6) NOT NULL,
+  Length TIME,
+  Highlighted BOOLEAN NOT NULL,
+  Username VARCHAR(100) NOT NULL,
+  PRIMARY KEY (StoryID),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+CREATE TABLE Email
+(
+  Email VARCHAR(100),
+  Username VARCHAR(100),
+  PRIMARY KEY (Email, Username),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+CREATE TABLE PhoneNo
+(
+  PhoneNo NUMERIC(10,0),
+  Username VARCHAR(100),
+  PRIMARY KEY (PhoneNo, Username),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+
+CREATE TABLE Follows
+(
+  FollowsUsername VARCHAR(100),
+  Username VARCHAR(100),
+  CHECK (NOT(FollowsUsername=Username)),
+  PRIMARY KEY (FollowsUsername, Username),
+  FOREIGN KEY (FollowsUsername) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+CREATE TABLE Block
+(
+  BlockedUsername VARCHAR(100),
+  Username VARCHAR(100),
+  CHECK (NOT(BlockedUsername =Username)),
+  PRIMARY KEY (BlockedUsername, Username),
+  FOREIGN KEY (BlockedUsername) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Report
+(
+  Reason VARCHAR(100) NOT NULL,
+  ReportId NUMERIC(10,0) NOT NULL,
+  UNIQUE (ReportId),
+  Username VARCHAR(100) ,
+  AgainstUsername VARCHAR(100),
+  CHECK (NOT(AgainstUsername  =Username)),
+  PRIMARY KEY (Username, AgainstUsername),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (AgainstUsername) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+CREATE TABLE PostLike
+(
+  Username VARCHAR(100),
+  PostID NUMERIC(10 ,0),
+  PRIMARY KEY (Username, PostID),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (PostID) REFERENCES Post(PostID)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+
+CREATE TABLE Saved
+(
+  Username VARCHAR(100),
+  PostID NUMERIC(10 ,0),
+  PRIMARY KEY (Username, PostID),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (PostID) REFERENCES Post(PostID)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE Tag
+(
+  TagName VARCHAR(100),
+  PRIMARY KEY (TagName)
+);
+
+
+
+
+
+
+
+
+CREATE TABLE Messages
+(
+  Content VARCHAR(100) NOT NULL,
+  Timestamp TIMESTAMP,
+  Type VARCHAR(6) NOT NULL,
+  LikedByReceiver BOOLEAN NOT NULL,
+  LikedBySender BOOLEAN NOT NULL,
+  SenderUsername VARCHAR(100) ,
+  ReceiverUsername VARCHAR(100),
+  PRIMARY KEY (Timestamp, SenderUsername, ReceiverUsername),
+  FOREIGN KEY (SenderUsername) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (ReceiverUsername) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+
+
+
+CREATE TABLE TagFollow
+(
+  Username VARCHAR(100),
+  TagName VARCHAR(100),
+  PRIMARY KEY (Username, TagName),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (TagName) REFERENCES Tag(TagName)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+CREATE TABLE StoryTaged
+(
+  SID NUMERIC(10,0),
+  TagName VARCHAR(100),
+  PRIMARY KEY (SID, TagName),
+  FOREIGN KEY (SID) REFERENCES Story(StoryID)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (TagName) REFERENCES Tag(TagName)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+
+CREATE TABLE PostTaged
+(
+  TagName VARCHAR(100),
+  PostID NUMERIC(10 ,0),
+  PRIMARY KEY (TagName, PostID),
+  FOREIGN KEY (TagName) REFERENCES Tag(TagName)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (PostID) REFERENCES Post(PostID)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+
+
+CREATE TABLE StoryReply
+(
+  Content VARCHAR(100) NOT NULL,
+  Type VARCHAR(6) NOT NULL,
+  Username VARCHAR(100),
+  StoryID NUMERIC(10,0),
+  PRIMARY KEY (Username, StoryID),
+  FOREIGN KEY (Username) REFERENCES Users(Username)
+ ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (StoryID) REFERENCES Story(StoryID)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
+
+
+CREATE TABLE Comment
+(
+  Content VARCHAR(200) NOT NULL,
+  CommentTimestamp TIMESTAMP,
+  OnPostID NUMERIC(10,0) NOT NULL,
+  CommentUsername VARCHAR(100),
+  PRIMARY KEY (CommentTimestamp, OnPostID, CommentUsername),
+  FOREIGN KEY (OnPostID) REFERENCES Post(PostID)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (CommentUsername) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE TABLE Reply
+(
+  OnPostID NUMERIC(10 ,0),
+  CommentUsername VARCHAR(100),
+  CommentTimestamp TIMESTAMP,
+  Content VARCHAR(200) NOT NULL,
+  ReplyTimestamp TIMESTAMP,
+  ReplyByUsername VARCHAR(100),
+        
+  POnPostID NUMERIC(10,0) NOT NULL,
+  PCommentUsername VARCHAR(100) NOT NULL,
+  PCommentTimestamp TIMESTAMP NOT NULL,
+  PReplyByUsername VARCHAR(100) NOT NULL,
+  PReplyTimestamp TIMESTAMP NOT NULL,
+  
+  PRIMARY KEY (ReplyTimestamp, ReplyByUsername, OnPostID, CommentUsername, CommentTimestamp),
+  FOREIGN KEY (ReplyByUsername) REFERENCES Users(Username)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (OnPostID, CommentUsername, CommentTimestamp) REFERENCES Comment(OnPostID, CommentUsername, CommentTimestamp)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (POnPostID, PCommentUsername, PCommentTimestamp,PReplyByUsername,PReplyTimestamp) REFERENCES Reply(OnPostID, CommentUsername, CommentTimestamp,ReplyByUsername,ReplyTimestamp)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
